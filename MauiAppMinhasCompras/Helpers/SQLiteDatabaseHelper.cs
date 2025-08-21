@@ -1,58 +1,54 @@
 ﻿using SQLite;
 using MauiAppMinhasCompras.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MauiAppMinhasCompras.Helpers
 {
     public class SQLiteDatabaseHelper
     {
-        private readonly SQLiteAsyncConnection _conn;
+        private readonly SQLiteAsyncConnection _connection;
 
         public SQLiteDatabaseHelper(string dbPath)
         {
-            _conn = new SQLiteAsyncConnection(dbPath);
-            _conn.CreateTableAsync<Produto>().Wait(); // simples e direto para este projeto
+            _connection = new SQLiteAsyncConnection(dbPath);
+            _connection.CreateTableAsync<Produto>().Wait();
         }
 
-        public Task<List<Produto>> GetAllAsync()
-            => _conn.Table<Produto>()
-                     .OrderBy(p => p.Descricao)
-                     .ToListAsync();
-
-        public Task<int> InsertAsync(Produto p)
-            => _conn.InsertAsync(p);
-
-        public Task<int> UpdateAsync(Produto p)
-            => _conn.UpdateAsync(p);
-
-        // Forma mais direta pela PK
-        public Task<int> DeleteAsync(int id)
-            => _conn.DeleteAsync<Produto>(id);
-
-        // Busca por descrição com LIKE parametrizado (case-insensitive)
-        public Task<List<Produto>> SearchAsync(string q)
+        // Método para pegar todos os produtos
+        public async Task<List<Produto>> GetAllAsync()
         {
-            if (string.IsNullOrWhiteSpace(q))
-                return GetAllAsync();
-
-            // Escapa curingas do LIKE
-            var pattern = $"%{q.Replace("%", "[%]")
-                               .Replace("_", "[_]")
-                               .Replace("[", "[[]")}%";
-
-            return _conn.QueryAsync<Produto>(
-                "SELECT * FROM Produto " +
-                "WHERE Descricao LIKE ? COLLATE NOCASE " +
-                "ORDER BY Descricao",
-                pattern
-            );
+            return await _connection.Table<Produto>().ToListAsync();
         }
 
-        public async Task ResetAsync()
+        // Método para buscar produtos por descrição
+        public async Task<List<Produto>> SearchAsync(string query)
         {
-            await _conn.DropTableAsync<Produto>();
-            await _conn.CreateTableAsync<Produto>();
+            return await _connection.Table<Produto>()
+                                     .Where(p => p.Descricao.Contains(query))
+                                     .ToListAsync();
+        }
+
+        // Método para resetar a tabela de produtos (excluir todos os produtos)
+        public async Task<int> ResetAsync()
+        {
+            return await _connection.DeleteAllAsync<Produto>();
+        }
+
+        // Método para inserir um produto
+        public async Task<int> InsertAsync(Produto produto)
+        {
+            return await _connection.InsertAsync(produto);
+        }
+
+        // Método para atualizar um produto
+        public async Task<int> UpdateAsync(Produto produto)
+        {
+            return await _connection.UpdateAsync(produto);
+        }
+
+        // Método para excluir um produto
+        public async Task<int> DeleteAsync(int id)
+        {
+            return await _connection.DeleteAsync<Produto>(id);
         }
     }
 }

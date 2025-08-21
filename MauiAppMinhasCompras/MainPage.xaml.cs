@@ -1,8 +1,6 @@
 ﻿using MauiAppMinhasCompras.Helpers;
-using MauiAppMinhasCompras.Models;
+using MauiAppMinhasCompras.Models; // <-- CORREÇÃO ADICIONADA AQUI
 using System.Globalization;
-using System.Linq;
-using System.Threading;
 
 namespace MauiAppMinhasCompras;
 
@@ -13,10 +11,7 @@ public partial class MainPage : ContentPage
 
     public List<Produto> Produtos { get; set; } = new();
     public decimal Total => Produtos.Sum(p => p.Quantidade * p.Preco);
-
     public string BotaoSalvarTexto => _editando is null ? "Salvar" : "Atualizar";
-
-    // Para debounce da busca
     private CancellationTokenSource? _buscaCts;
 
     public MainPage()
@@ -55,12 +50,8 @@ public partial class MainPage : ContentPage
     {
         value = 0m;
         if (string.IsNullOrWhiteSpace(input)) return false;
-
-        // Tenta padrão brasileiro
         if (decimal.TryParse(input, NumberStyles.Number, new CultureInfo("pt-BR"), out value))
             return true;
-
-        // Tenta convertendo vírgula -> ponto (teclado numérico)
         var normalized = input.Replace(',', '.');
         return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out value);
     }
@@ -118,36 +109,17 @@ public partial class MainPage : ContentPage
         await CarregarAsync();
     }
 
-    // Editar: toque no item
-    private void ProdutosListView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private async void OnExcluirClicked(object sender, EventArgs e)
     {
-        if (e.CurrentSelection?.FirstOrDefault() is Produto p)
-        {
-            _editando = p;
-            DescricaoEntry.Text = p.Descricao;
-            QuantidadeEntry.Text = p.Quantidade.ToString(CultureInfo.InvariantCulture);
-            PrecoEntry.Text = p.Preco.ToString("0.##", new CultureInfo("pt-BR"));
-            OnPropertyChanged(nameof(BotaoSalvarTexto));
-        }
-
-        // remove seleção
-        ((CollectionView)sender!).SelectedItem = null;
-    }
-
-    // Excluir (Swipe)
-    private async void OnExcluirSwipeInvoked(object sender, EventArgs e)
-    {
-        if (sender is SwipeItem swipe && swipe.CommandParameter is Produto p)
+        if (sender is Button button && button.CommandParameter is Produto p)
         {
             var ok = await DisplayAlert("Excluir", $"Remover \"{p.Descricao}\"?", "Sim", "Não");
             if (!ok) return;
-
             await _db.DeleteAsync(p.Id);
             await CarregarAsync();
         }
     }
 
-    // Busca reativa com debounce
     private async void OnBuscarTextChanged(object sender, TextChangedEventArgs e)
     {
         _buscaCts?.Cancel();
@@ -155,7 +127,7 @@ public partial class MainPage : ContentPage
 
         try
         {
-            await Task.Delay(250, cts.Token); // debounce
+            await Task.Delay(250, cts.Token);
             var q = e.NewTextValue?.Trim();
 
             Produtos = string.IsNullOrWhiteSpace(q)
@@ -168,6 +140,23 @@ public partial class MainPage : ContentPage
         catch (TaskCanceledException)
         {
             // ignorado
+        }
+    }
+
+    private void ProdutosListView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection?.FirstOrDefault() is Produto p)
+        {
+            _editando = p;
+            DescricaoEntry.Text = p.Descricao;
+            QuantidadeEntry.Text = p.Quantidade.ToString(CultureInfo.InvariantCulture);
+            PrecoEntry.Text = p.Preco.ToString("0.##", new CultureInfo("pt-BR"));
+            OnPropertyChanged(nameof(BotaoSalvarTexto));
+        }
+
+        if (sender is CollectionView collectionView)
+        {
+            collectionView.SelectedItem = null;
         }
     }
 }
