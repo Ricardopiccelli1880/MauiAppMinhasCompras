@@ -4,7 +4,6 @@
              xmlns:models="clr-namespace:MauiAppMinhasCompras.Models"
              x:Class="MauiAppMinhasCompras.MainPage"
              Title="Produtos">
-
     <ContentPage.Padding>
         <OnPlatform x:TypeArguments="Thickness">
             <On Platform="Android,iOS" Value="16,16,16,8" />
@@ -13,7 +12,6 @@
     </ContentPage.Padding>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*">
-
         <Label Text="Produtos" FontSize="28" FontAttributes="Bold" />
 
         <Grid Grid.Row="1" ColumnDefinitions="2*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
@@ -25,30 +23,26 @@
         </Grid>
 
         <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
-
-            <SearchBar Grid.Row="0" Grid.ColumnSpan="3" Placeholder="Buscar descrição" TextChanged="OnBuscarTextChanged" />
-
+            <SearchBar Grid.Row="0" Grid.ColumnSpan="3" x:Name="SearchBar" Placeholder="Buscar descrição" TextChanged="OnBuscarTextChanged" />
             <Button Grid.Row="1" Grid.Column="0" Text="Adicionar Produto Exemplo" Clicked="OnAdicionarExemploClicked" />
             <Button Grid.Row="1" Grid.Column="1" Text="Mostrar Produtos" Clicked="OnRecarregarClicked" />
             <Button Grid.Row="1" Grid.Column="2" Text="Resetar Banco" Clicked="OnResetarBancoClicked" />
 
             <CollectionView Grid.Row="2" Grid.ColumnSpan="3"
-                          x:Name="ProdutosListView"
-                          ItemsSource="{Binding Produtos}"
-                          SelectionMode="Single"
-                          SelectionChanged="ProdutosListView_SelectionChanged">
+                            x:Name="ProdutosListView"
+                            ItemsSource="{Binding ProdutosVisiveis}"
+                            SelectionMode="Single"
+                            SelectionChanged="ProdutosListView_SelectionChanged">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Produto">
                         <Grid Padding="8" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                             <Label Grid.Column="0" Text="{Binding Descricao}" FontSize="18" VerticalOptions="Center"/>
-
                             <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalOptions="Center">
                                 <Label Text="{Binding Quantidade}" />
                                 <Label Text="x" />
                                 <Label Text="{Binding Preco, StringFormat='R$ {0:N2}'}" />
                                 <Label Text="{Binding Total, StringFormat='= R$ {0:N2}'}" FontAttributes="Bold" />
                             </StackLayout>
-
                             <Button Grid.Column="2"
                                     Text="X"
                                     BackgroundColor="Tomato"
@@ -56,12 +50,11 @@
                                     WidthRequest="45"
                                     HeightRequest="45"
                                     CornerRadius="22"  FontAttributes="Bold"
-                                    Clicked="OnExcluirClicked" 
+                                    Clicked="OnExcluirClicked"
                                     CommandParameter="{Binding .}" />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
-
                 <CollectionView.EmptyView>
                     <Label Text="Nenhum produto cadastrado." Padding="12" />
                 </CollectionView.EmptyView>
@@ -69,9 +62,9 @@
         </Grid>
 
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Padding="0,8,0,0">
-            <Label Text="Total:" FontAttributes="Bold" />
-            <Label Grid.Column="1" Text="{Binding Total, StringFormat='R$ {0:N2}'}" FontAttributes="Bold" />
-        </Grid>
+            <Label Text="Total (filtrado):" FontAttributes="Bold" />
 
+            <Label Grid.Column="1" Text="{Binding TotalVisivel, StringFormat='R$ {0:N2}'}" FontAttributes="Bold" />
+        </Grid>
     </Grid>
 </ContentPage>
