@@ -11,8 +11,9 @@
         </OnPlatform>
     </ContentPage.Padding>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*">
-        <Label Text="Produtos" FontSize="28" FontAttributes="Bold" />
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" ColumnDefinitions="*">
+
+        <Label Grid.Row="0" Text="Produtos" FontSize="28" FontAttributes="Bold" />
 
         <Grid Grid.Row="1" ColumnDefinitions="2*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
             <Entry x:Name="DescricaoEntry" Placeholder="Descrição" Grid.Column="0"/>
@@ -22,13 +23,25 @@
             <Button Text="Limpar" Clicked="OnLimparClicked" Grid.Column="4"/>
         </Grid>
 
-        <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
-            <SearchBar Grid.Row="0" Grid.ColumnSpan="3" x:Name="SearchBar" Placeholder="Buscar descrição" TextChanged="OnBuscarTextChanged" />
-            <Button Grid.Row="1" Grid.Column="0" Text="Adicionar Produto Exemplo" Clicked="OnAdicionarExemploClicked" />
-            <Button Grid.Row="1" Grid.Column="1" Text="Mostrar Produtos" Clicked="OnRecarregarClicked" />
-            <Button Grid.Row="1" Grid.Column="2" Text="Resetar Banco" Clicked="OnResetarBancoClicked" />
+        <StackLayout Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+            <Label Text="Data da Compra:" VerticalOptions="Center"/>
+            <DatePicker x:Name="DataCadastroPicker" Format="dd/MM/yyyy" />
+        </StackLayout>
 
-            <CollectionView Grid.Row="2" Grid.ColumnSpan="3"
+        <Grid Grid.Row="3" Margin="0,12,0,0" RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,*" ColumnSpacing="8">
+
+            <DatePicker Grid.Row="0" Grid.Column="0" x:Name="FiltroDataInicioPicker" DateSelected="OnFiltroDataChanged" Format="dd/MM/yyyy" />
+            <DatePicker Grid.Row="0" Grid.Column="1" x:Name="FiltroDataFimPicker" DateSelected="OnFiltroDataChanged" Format="dd/MM/yyyy" />
+
+            <SearchBar Grid.Row="1" Grid.ColumnSpan="2" x:Name="SearchBar" Placeholder="Buscar descrição" TextChanged="OnBuscarTextChanged" />
+
+            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="8" HorizontalOptions="Center" Margin="0,8,0,8">
+                <Button Text="Adicionar Produto Exemplo" Clicked="OnAdicionarExemploClicked" />
+                <Button Text="Mostrar Produtos" Clicked="OnRecarregarClicked" />
+                <Button Text="Resetar Banco" Clicked="OnResetarBancoClicked" />
+            </HorizontalStackLayout>
+
+            <CollectionView Grid.Row="3" Grid.ColumnSpan="2"
                             x:Name="ProdutosListView"
                             ItemsSource="{Binding ProdutosVisiveis}"
                             SelectionMode="Single"
@@ -36,13 +49,18 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Produto">
                         <Grid Padding="8" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                            <Label Grid.Column="0" Text="{Binding Descricao}" FontSize="18" VerticalOptions="Center"/>
+                            <StackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="{Binding Descricao}" FontSize="18" />
+                                <Label Text="{Binding DataCadastro, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray"/>
+                            </StackLayout>
+
                             <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalOptions="Center">
                                 <Label Text="{Binding Quantidade}" />
                                 <Label Text="x" />
                                 <Label Text="{Binding Preco, StringFormat='R$ {0:N2}'}" />
                                 <Label Text="{Binding Total, StringFormat='= R$ {0:N2}'}" FontAttributes="Bold" />
                             </StackLayout>
+
                             <Button Grid.Column="2"
                                     Text="X"
                                     BackgroundColor="Tomato"
@@ -61,9 +79,8 @@
             </CollectionView>
         </Grid>
 
-        <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Padding="0,8,0,0">
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Padding="0,8,0,0">
             <Label Text="Total (filtrado):" FontAttributes="Bold" />
-
             <Label Grid.Column="1" Text="{Binding TotalVisivel, StringFormat='R$ {0:N2}'}" FontAttributes="Bold" />
         </Grid>
     </Grid>
